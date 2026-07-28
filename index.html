@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Archivo público de partidos de Universidad de Chile vistos en el estadio.">
+  <title>La U en la cancha</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/plotly.min.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-mark">U</div>
+    <div>
+      <strong>Cargando archivo de partidos</strong>
+      <span>Preparando estadísticas y gráficos…</span>
+    </div>
+  </div>
+
+  <button id="mobile-filter-button" class="mobile-filter-button" type="button" aria-label="Abrir filtros">Filtros</button>
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-head">
+      <div class="brand-mark">U</div>
+      <div>
+        <div class="brand-name">La U en la cancha</div>
+        <div class="brand-caption">Archivo de partidos</div>
+      </div>
+      <button id="close-sidebar" class="icon-button sidebar-close" type="button" aria-label="Cerrar filtros">×</button>
+    </div>
+
+    <div class="filter-status">
+      <span>Partidos visibles</span>
+      <strong id="visible-count">—</strong>
+    </div>
+
+    <div class="filter-block">
+      <label class="filter-label" for="date-from">Fechas</label>
+      <div class="filter-grid-two">
+        <input id="date-from" type="date">
+        <input id="date-to" type="date">
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <label class="filter-label" for="year-from">Años</label>
+      <div class="filter-grid-two">
+        <select id="year-from"></select>
+        <select id="year-to"></select>
+      </div>
+    </div>
+
+    <fieldset class="filter-block filter-checks">
+      <legend class="filter-label">Condición</legend>
+      <div id="condition-checks"></div>
+    </fieldset>
+
+    <fieldset class="filter-block filter-checks">
+      <legend class="filter-label">Resultado</legend>
+      <div id="result-checks"></div>
+    </fieldset>
+
+    <div class="filter-block">
+      <label class="filter-label" for="rival-filter">Rival</label>
+      <select id="rival-filter"></select>
+    </div>
+
+    <div class="filter-block">
+      <label class="filter-label" for="stadium-filter">Estadio</label>
+      <select id="stadium-filter"></select>
+    </div>
+
+    <div class="filter-block">
+      <label class="filter-label" for="competition-filter">Torneo</label>
+      <select id="competition-filter"></select>
+    </div>
+
+    <div class="filter-block">
+      <label class="filter-label" for="coach-filter">Entrenador</label>
+      <select id="coach-filter"></select>
+    </div>
+
+    <button id="reset-filters" class="button button-secondary button-full" type="button">Restablecer filtros</button>
+    <div class="sidebar-footer">Datos publicados en modo de solo lectura.</div>
+  </aside>
+
+  <main class="main-shell">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">Universidad de Chile</div>
+        <h1>La U en la cancha</h1>
+        <p id="page-caption">Archivo personal de partidos vistos en el estadio.</p>
+      </div>
+      <div class="header-meta">
+        <span>Actualizado</span>
+        <strong id="updated-at">—</strong>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab-button active" data-tab="summary" type="button">Resumen</button>
+      <button class="tab-button" data-tab="years" type="button">Años</button>
+      <button class="tab-button" data-tab="conditions" type="button">Condición</button>
+      <button class="tab-button" data-tab="stadiums" type="button">Estadios</button>
+      <button class="tab-button" data-tab="rivals" type="button">Rivales</button>
+      <button class="tab-button" data-tab="goals" type="button">Goles</button>
+      <button class="tab-button" data-tab="coaches" type="button">Entrenadores</button>
+      <button class="tab-button" data-tab="matches" type="button">Partidos</button>
+      <button class="tab-button" data-tab="other" type="button">Otros partidos</button>
+    </nav>
+
+    <div id="empty-state" class="empty-state" hidden>
+      <strong>No hay partidos con estos filtros.</strong>
+      <span>Restablece los filtros o amplía el rango de fechas.</span>
+    </div>
+
+    <section id="tab-summary" class="tab-panel active"></section>
+    <section id="tab-years" class="tab-panel"></section>
+    <section id="tab-conditions" class="tab-panel"></section>
+    <section id="tab-stadiums" class="tab-panel"></section>
+    <section id="tab-rivals" class="tab-panel"></section>
+    <section id="tab-goals" class="tab-panel"></section>
+    <section id="tab-coaches" class="tab-panel"></section>
+    <section id="tab-matches" class="tab-panel"></section>
+    <section id="tab-other" class="tab-panel"></section>
+  </main>
+
+  <dialog id="match-dialog" class="match-dialog">
+    <button id="close-dialog" class="dialog-close" type="button" aria-label="Cerrar">×</button>
+    <div id="match-dialog-content"></div>
+  </dialog>
+
+  <noscript>Esta página necesita JavaScript para mostrar los datos y gráficos.</noscript>
+</body>
+</html>
