@@ -1,27 +1,27 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-28T10:11:58-04:00",
+  "generated_at": "2026-07-28T21:22:56-04:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
   },
   "stats": {
-    "uch_matches": 179,
+    "uch_matches": 180,
     "other_matches": 66,
-    "all_matches": 245,
-    "goals_uch": 297,
-    "goals_against": 189,
-    "goal_records": 297,
-    "wins": 86,
+    "all_matches": 246,
+    "goals_uch": 299,
+    "goals_against": 190,
+    "goal_records": 299,
+    "wins": 87,
     "draws": 51,
     "losses": 40,
-    "performance": 58.2,
+    "performance": 58.4,
     "stadiums": 17,
     "rivals": 47,
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-07-05"
+    "date_max": "2026-07-26"
   },
   "filters": {
     "years": [
@@ -10172,6 +10172,64 @@
           "player": "J. ALTAMIRANO",
           "minute": null,
           "order": 3,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": 246,
+      "date": "2026-07-26",
+      "year": 2026,
+      "home": "AUDAX",
+      "away": "UNIVERSIDAD DE CHILE",
+      "home_score": 1,
+      "away_score": 2,
+      "score": "1-2",
+      "competition": "CAMPEONATO NACIONAL",
+      "competition_type": null,
+      "stadium": "Estadio Bicentenario Municipal de La Florida",
+      "stadium_alias": "La Florida",
+      "stadium_city": "Santiago",
+      "stadium_country": "Chile",
+      "latitude": -33.5384,
+      "longitude": -70.5783,
+      "status": "played",
+      "attendance": null,
+      "neutral": false,
+      "penalty_shootout": null,
+      "honors": [],
+      "rival": "AUDAX",
+      "condition": "Visita",
+      "goals_uch": 2,
+      "goals_rival": 1,
+      "goal_difference": 1,
+      "points": 3,
+      "result": "Triunfo",
+      "coach": {
+        "display": "Fernando Gago",
+        "official": "Fernando Gago",
+        "touchline": "Fernando Gago",
+        "suspended": false
+      },
+      "goals": [
+        {
+          "id": 298,
+          "match_id": 246,
+          "player": "A. ARCE",
+          "minute": null,
+          "order": 1,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        },
+        {
+          "id": 299,
+          "match_id": 246,
+          "player": "E. VARGAS",
+          "minute": null,
+          "order": 2,
           "type": "regular",
           "own_goal": false,
           "penalty": false
