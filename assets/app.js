@@ -118,7 +118,7 @@ function setupFilters() {
   setupCheckboxes($("#result-checks"), RESULT_ORDER.filter(v => filters.results.includes(v)), "result");
   setSelectOptions($("#rival-filter"), filters.rivals, "Todos los rivales");
   const stadiumAliasByName = new Map(
-    [...state.data.matches, ...state.data.other_matches]
+    [...(state.data.uch_matches || []), ...(state.data.other_matches || [])]
       .filter(match => match.stadium)
       .map(match => [match.stadium, match.stadium_alias || match.stadium])
   );
