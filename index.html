@@ -23,6 +23,7 @@
 
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-head">
+      <a class="portal-home sidebar-home" href="https://javignacio.github.io/collections-page/" aria-label="Volver al portal de colecciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.7a.5.5 0 0 1-.5.5H15v-6H9v6H3.5a.5.5 0 0 1-.5-.5v-9.7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></a>
       <div class="brand-mark">U</div>
       <div>
         <div class="brand-name">La U en la cancha</div>
@@ -62,25 +63,27 @@
       <div id="result-checks"></div>
     </fieldset>
 
-    <div class="filter-block">
-      <label class="filter-label" for="rival-filter">Rival</label>
-      <select id="rival-filter"></select>
-    </div>
-
-    <div class="filter-block">
-      <label class="filter-label" for="stadium-filter">Estadio</label>
-      <select id="stadium-filter"></select>
-    </div>
-
-    <div class="filter-block">
-      <label class="filter-label" for="competition-filter">Torneo</label>
-      <select id="competition-filter"></select>
-    </div>
-
-    <div class="filter-block">
-      <label class="filter-label" for="coach-filter">Entrenador</label>
-      <select id="coach-filter"></select>
-    </div>
+    <details class="filter-more">
+      <summary>Más filtros</summary>
+      <div class="filter-more-body">
+        <div class="filter-block">
+          <label class="filter-label" for="rival-filter">Rival</label>
+          <select id="rival-filter"></select>
+        </div>
+        <div class="filter-block">
+          <label class="filter-label" for="stadium-filter">Estadio</label>
+          <select id="stadium-filter"></select>
+        </div>
+        <div class="filter-block">
+          <label class="filter-label" for="competition-filter">Torneo</label>
+          <select id="competition-filter"></select>
+        </div>
+        <div class="filter-block">
+          <label class="filter-label" for="coach-filter">Entrenador</label>
+          <select id="coach-filter"></select>
+        </div>
+      </div>
+    </details>
 
     <button id="reset-filters" class="button button-secondary button-full" type="button">Restablecer filtros</button>
     <div class="sidebar-footer">Datos publicados en modo de solo lectura.</div>
@@ -88,10 +91,13 @@
 
   <main class="main-shell">
     <header class="page-header">
-      <div>
+      <div class="page-heading-row">
+        <a class="portal-home header-home" href="https://javignacio.github.io/collections-page/" aria-label="Volver al portal de colecciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.7a.5.5 0 0 1-.5.5H15v-6H9v6H3.5a.5.5 0 0 1-.5-.5v-9.7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Colecciones</span></a>
+        <div>
         <div class="eyebrow">Universidad de Chile</div>
         <h1>La U en la cancha</h1>
         <p id="page-caption">Archivo personal de partidos vistos en el estadio.</p>
+        </div>
       </div>
       <div class="header-meta">
         <span>Actualizado</span>

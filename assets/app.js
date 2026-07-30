@@ -25,7 +25,11 @@ const state = {
   selectedCoach: null,
   matchView: "cards",
   matchSearch: "",
-  otherSearch: ""
+  matchPage: 1,
+  matchPageSize: 12,
+  otherSearch: "",
+  otherPage: 1,
+  otherPageSize: 25
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -113,7 +117,15 @@ function setupFilters() {
   setupCheckboxes($("#condition-checks"), CONDITION_ORDER.filter(v => filters.conditions.includes(v)), "condition");
   setupCheckboxes($("#result-checks"), RESULT_ORDER.filter(v => filters.results.includes(v)), "result");
   setSelectOptions($("#rival-filter"), filters.rivals, "Todos los rivales");
-  setSelectOptions($("#stadium-filter"), filters.stadiums, "Todos los estadios");
+  const stadiumAliasByName = new Map(
+    [...state.data.matches, ...state.data.other_matches]
+      .filter(match => match.stadium)
+      .map(match => [match.stadium, match.stadium_alias || match.stadium])
+  );
+  const stadiumFilter = $("#stadium-filter");
+  stadiumFilter.innerHTML = optionHtml("", "Todos los estadios") + filters.stadiums
+    .map(stadium => optionHtml(stadium, stadiumAliasByName.get(stadium) || stadium))
+    .join("");
   setSelectOptions($("#competition-filter"), filters.competitions, "Todos los torneos");
   setSelectOptions($("#coach-filter"), filters.coaches, "Todos los entrenadores");
 
@@ -285,6 +297,31 @@ function sectionHeading(title, subtitle = "") {
   return `<div class="section-heading"><h2>${escapeHtml(title)}</h2>${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}</div>`;
 }
 
+function dataDisclosure(title, tableHtml, count, open = false) {
+  return `<details class="data-disclosure" ${open ? "open" : ""}><summary>${escapeHtml(title)}<span>${fmtInt(count)} registros</span></summary>${tableHtml}</details>`;
+}
+
+function paginate(items, page, pageSize) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * pageSize;
+  return { page: safePage, totalPages, start, end: Math.min(start + pageSize, items.length), items: items.slice(start, start + pageSize) };
+}
+
+function paginationControls(prefix, pageData, totalItems, pageSize) {
+  return `<div class="pagination">
+    <div class="pagination-info">Mostrando ${totalItems ? pageData.start + 1 : 0}–${pageData.end} de ${fmtInt(totalItems)}</div>
+    <div class="pagination-actions">
+      <select class="page-size" id="${prefix}-page-size" aria-label="Resultados por página">
+        ${[12, 24, 25, 48, 50, 100].filter((v,i,a)=>a.indexOf(v)===i).map(v => `<option value="${v}" ${v === pageSize ? "selected" : ""}>${v} / pág.</option>`).join("")}
+      </select>
+      <button class="page-button" type="button" id="${prefix}-prev" ${pageData.page <= 1 ? "disabled" : ""}>Anterior</button>
+      <span class="pagination-info">${pageData.page} / ${pageData.totalPages}</span>
+      <button class="page-button" type="button" id="${prefix}-next" ${pageData.page >= pageData.totalPages ? "disabled" : ""}>Siguiente</button>
+    </div>
+  </div>`;
+}
+
 function matchTitle(match, other = false) {
   const score = match.score || "S/M";
   return `${match.home} ${score} ${match.away}`;
@@ -302,7 +339,7 @@ function matchCard(match, other = false) {
       ${match.penalty_shootout ? `<span class="chip">Penales ${escapeHtml(match.penalty_shootout.score || "")}</span>` : ""}
       ${honors}
     </div>
-    <div class="match-meta">${escapeHtml(match.stadium)}${!other && match.coach ? ` · ${escapeHtml(match.coach.display)}` : ""}</div>
+    <div class="match-meta" title="${escapeHtml(match.stadium)}">${escapeHtml(match.stadium_alias || match.stadium)}${!other && match.coach ? ` · ${escapeHtml(match.coach.display)}` : ""}</div>
   </button>`;
 }
 
@@ -481,13 +518,13 @@ function renderSummary() {
   const yearRows = summaryRows(state.filtered, m => m.year, "year");
   const bestYear = [...yearRows].sort((a, b) => b.performance - a.performance || b.matches - a.matches)[0];
   const rivalTop = topCount(state.filtered, m => m.rival)[0];
-  const stadiumTop = topCount(state.filtered, m => m.stadium)[0];
+  const stadiumTop = topCount(state.filtered, m => m.stadium_alias || m.stadium)[0];
   const scorerTop = topCount(goals, g => g.player)[0];
   const goalFest = [...state.filtered].filter(m => m.goals_uch !== null).sort((a, b) => (b.goals_uch + b.goals_rival) - (a.goals_uch + a.goals_rival))[0];
   const recent = [...state.filtered].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id).slice(0, 3);
   const resultRows = RESULT_ORDER.map(label => ({ label, count: state.filtered.filter(m => m.result === label).length })).filter(r => r.count);
   const conditionRows = CONDITION_ORDER.map(label => ({ label, count: state.filtered.filter(m => m.condition === label).length })).filter(r => r.count);
-  const stadiumRows = topCount(state.filtered, m => m.stadium).slice(0, 10).map(r => ({ label: r.label, count: r.count }));
+  const stadiumRows = topCount(state.filtered, m => m.stadium_alias || m.stadium).slice(0, 10).map(r => ({ label: r.label, count: r.count }));
   const rivalRows = topCount(state.filtered, m => m.rival).slice(0, 10).map(r => ({ label: r.label, count: r.count }));
 
   root.innerHTML = `
@@ -566,10 +603,7 @@ function renderYears() {
       <div class="panel-card"><div id="year-goals-chart" class="plot"></div></div>
     </div>
     <div class="panel-card"><div id="year-performance-chart" class="plot"></div></div>
-    ${sectionHeading("Tabla anual")}
-    <div class="table-wrap"><table><thead><tr><th>Año</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th><th>Estadios</th></tr></thead><tbody>
-      ${[...rows].reverse().map(r => `<tr><td>${r.year}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td><td>${r.stadiums}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Tabla anual", `<div class="table-wrap"><table><thead><tr><th>Año</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th><th>Estadios</th></tr></thead><tbody>${[...rows].reverse().map(r => `<tr><td>${r.year}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td><td>${r.stadiums}</td></tr>`).join("")}</tbody></table></div>`, rows.length)} `;
   const select = $("#year-detail");
   select.value = String(state.selectedYear);
   select.addEventListener("change", () => { state.selectedYear = Number(select.value); renderYears(); });
@@ -586,32 +620,44 @@ function renderConditions() {
   if (!state.filtered.length) { root.innerHTML = ""; return; }
   const rows = summaryRows(state.filtered, m => m.condition, "condition")
     .sort((a, b) => CONDITION_ORDER.indexOf(a.condition) - CONDITION_ORDER.indexOf(b.condition));
+  const total = summarize(state.filtered);
+  const tableHtml = `<div class="table-wrap"><table><thead><tr><th>Condición</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.condition)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`;
   root.innerHTML = `
     <div class="metric-grid">
+      ${metricCard("Partidos analizados", fmtInt(total.matches), "Selección actual")}
+      ${metricCard("Mejor condición", rows.length ? [...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].condition : "Sin datos", rows.length ? fmtPct([...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].performance) : "")}
+      ${metricCard("Goles UCH", fmtInt(total.gf), `${fmtInt(total.gc)} recibidos`)}
+      ${metricCard("Rendimiento global", fmtPct(total.performance), `${total.wins}-${total.draws}-${total.losses}`)}
+    </div>
+    ${sectionHeading("Comparación por condición", "Una lectura compacta del rendimiento y el récord") }
+    <div class="condition-scorecards">
       ${CONDITION_ORDER.map(condition => {
         const row = rows.find(r => r.condition === condition);
-        return metricCard(condition, row ? `${row.matches} · ${fmtPct(row.performance)}` : "0", "Partidos · rendimiento");
+        const performance = row ? row.performance : 0;
+        return `<article class="condition-scorecard"><div class="condition-scorecard-head"><strong>${escapeHtml(condition)}</strong><span>${row ? `${row.matches} partidos` : "Sin partidos"}</span></div><div class="condition-bar"><span style="width:${Math.max(0, Math.min(100, performance))}%"></span></div><div class="condition-record">${row ? `${row.wins}-${row.draws}-${row.losses} · ${fmtPct(performance)} · GF ${row.gf} / GC ${row.gc}` : "Sin datos"}</div></article>`;
       }).join("")}
-      ${metricCard("Partidos analizados", fmtInt(state.filtered.length))}
     </div>
-    <div class="chart-grid wide-left">
+    <div class="chart-grid">
       <div class="panel-card"><div id="condition-donut-chart" class="plot"></div></div>
       <div class="panel-card"><div id="condition-results-chart" class="plot"></div></div>
+      <div class="panel-card"><div id="condition-performance-chart" class="plot"></div></div>
+      <div class="panel-card"><div id="condition-goals-chart" class="plot"></div></div>
     </div>
-    <div class="panel-card"><div id="condition-performance-chart" class="plot"></div></div>
-    ${sectionHeading("Detalle por condición")}
-    <div class="table-wrap"><table><thead><tr><th>Condición</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${escapeHtml(r.condition)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Tabla por condición", tableHtml, rows.length)} `;
   plotDonut("condition-donut-chart", rows.map(r => ({ label: r.condition, count: r.matches })), "label", "count", "Distribución por condición");
   plotStackedResults("condition-results-chart", rows, "condition", "Resultados por condición");
-  plotVertical("condition-performance-chart", rows, "condition", "performance", "Rendimiento por condición", "#2563eb");
+  plotHorizontal("condition-performance-chart", rows.map(r => ({ label:r.condition, performance:Math.round(r.performance*10)/10 })), "label", "performance", "Rendimiento por condición (%)", "#2563eb");
+  Plotly.relayout("condition-performance-chart", { "xaxis.range": [0, 100], "xaxis.ticksuffix": "%" });
+  plotGrouped("condition-goals-chart", rows.map(r=>r.condition), [
+    { name:"GF", values:rows.map(r=>r.gf), color:"#2563eb" },
+    { name:"GC", values:rows.map(r=>r.gc), color:"#b22222" }
+  ], "Goles a favor y en contra");
 }
 
 function stadiumRows(matches) {
-  return summaryRows(matches, m => m.stadium, "label").map(row => {
-    const first = row.items.find(m => m.latitude !== null && m.longitude !== null) || row.items[0];
-    return { ...row, latitude: first.latitude, longitude: first.longitude, city: first.stadium_city, country: first.stadium_country };
+  return summaryRows(matches, m => m.stadium_alias || m.stadium, "label").map(row => {
+    const first = row.items[0];
+    return { ...row, fullName:first.stadium, latitude: first.latitude, longitude: first.longitude, city: first.stadium_city, country: first.stadium_country };
   }).sort((a, b) => b.matches - a.matches || a.label.localeCompare(b.label, "es"));
 }
 
@@ -635,6 +681,7 @@ function renderStadiums() {
       <h2 class="detail-title">${escapeHtml(selected.label)}</h2>
       <p class="detail-subtitle">${escapeHtml([selected.city, selected.country].filter(Boolean).join(" · ") || "Ubicación sin datos")}</p>
       <div class="detail-grid">
+        ${detailField("Nombre oficial", selected.fullName || selected.label)}
         ${detailField("Partidos", selected.matches)}
         ${detailField("G-E-P", `${selected.wins}-${selected.draws}-${selected.losses}`)}
         ${detailField("Rendimiento", fmtPct(selected.performance))}
@@ -645,10 +692,7 @@ function renderStadiums() {
       <div class="panel-card"><div id="stadium-ranking-chart" class="plot tall"></div></div>
       <div class="panel-card"><div id="stadium-map-chart" class="plot tall"></div></div>
     </div>
-    ${sectionHeading("Tabla de estadios")}
-    <div class="table-wrap"><table><thead><tr><th>Estadio</th><th>Ciudad</th><th>País</th><th>Partidos</th><th>G-E-P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${escapeHtml(r.label)}</td><td>${escapeHtml(r.city || "")}</td><td>${escapeHtml(r.country || "")}</td><td>${r.matches}</td><td>${r.wins}-${r.draws}-${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Tabla de estadios", `<div class="table-wrap"><table><thead><tr><th>Estadio</th><th>Nombre oficial</th><th>Ciudad</th><th>País</th><th>Partidos</th><th>G-E-P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.label)}</td><td>${escapeHtml(r.fullName || r.label)}</td><td>${escapeHtml(r.city || "")}</td><td>${escapeHtml(r.country || "")}</td><td>${r.matches}</td><td>${r.wins}-${r.draws}-${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`, rows.length)} `;
   const select = $("#stadium-detail");
   select.value = state.selectedStadium;
   select.addEventListener("change", () => { state.selectedStadium = select.value; renderStadiums(); });
@@ -686,10 +730,7 @@ function renderRivals() {
       <div class="panel-card"><div id="rival-results-chart" class="plot tall"></div></div>
     </div>
     <div class="panel-card"><div id="rival-goals-chart" class="plot"></div></div>
-    ${sectionHeading("Tabla de rivales")}
-    <div class="table-wrap"><table><thead><tr><th>Rival</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th><th>Estadios</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${escapeHtml(r.rival)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td><td>${r.stadiums}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Tabla de rivales", `<div class="table-wrap"><table><thead><tr><th>Rival</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th><th>Estadios</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.rival)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td><td>${r.stadiums}</td></tr>`).join("")}</tbody></table></div>`, rows.length)} `;
   const select = $("#rival-detail");
   select.value = state.selectedRival;
   select.addEventListener("change", () => { state.selectedRival = select.value; renderRivals(); });
@@ -735,10 +776,7 @@ function renderGoals() {
       <div class="panel-card"><div id="scorer-ranking-chart" class="plot tall"></div></div>
       <div class="panel-card"><div id="goals-per-match-chart" class="plot tall"></div></div>
     </div>
-    ${sectionHeading("Detalle de goles", `${fmtInt(goals.length)} registros disponibles`)}
-    <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Goleador</th><th>Rival</th><th>Resultado</th><th>Torneo</th><th>Estadio</th><th>Detalle</th></tr></thead><tbody>
-      ${[...goals].sort((a,b) => b.date.localeCompare(a.date)).map(g => `<tr><td>${fmtDate(g.date)}</td><td>${escapeHtml(g.player)}</td><td>${escapeHtml(g.rival)}</td><td>${escapeHtml(g.score || "S/M")}</td><td>${escapeHtml(g.competition)}</td><td>${escapeHtml(g.stadium)}</td><td>${g.penalty ? "Penal" : ""}${g.own_goal ? "Autogol" : ""}${!g.penalty && !g.own_goal ? "—" : ""}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Detalle de goles", `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Goleador</th><th>Rival</th><th>Resultado</th><th>Torneo</th><th>Estadio</th><th>Detalle</th></tr></thead><tbody>${[...goals].sort((a,b) => b.date.localeCompare(a.date)).map(g => `<tr><td>${fmtDate(g.date)}</td><td>${escapeHtml(g.player)}</td><td>${escapeHtml(g.rival)}</td><td>${escapeHtml(g.score || "S/M")}</td><td>${escapeHtml(g.competition)}</td><td>${escapeHtml(g.stadium_alias || g.stadium)}</td><td>${g.penalty ? "Penal" : ""}${g.own_goal ? "Autogol" : ""}${!g.penalty && !g.own_goal ? "—" : ""}</td></tr>`).join("")}</tbody></table></div>`, goals.length)} `;
   if (scorers.length) {
     const select = $("#scorer-detail");
     select.value = state.selectedScorer;
@@ -779,10 +817,7 @@ function renderCoaches() {
       <div class="panel-card"><div id="coach-results-chart" class="plot tall"></div></div>
     </div>
     <div class="panel-card"><div id="coach-goals-chart" class="plot"></div></div>
-    ${sectionHeading("Tabla de entrenadores")}
-    <div class="table-wrap"><table><thead><tr><th>Entrenador</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${escapeHtml(r.coach)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${dataDisclosure("Tabla de entrenadores", `<div class="table-wrap"><table><thead><tr><th>Entrenador</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.coach)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`, rows.length)} `;
   const select = $("#coach-detail");
   select.value = state.selectedCoach;
   select.addEventListener("change", () => { state.selectedCoach = select.value; renderCoaches(); });
@@ -796,8 +831,8 @@ function renderCoaches() {
 }
 
 function matchesTable(matches, other = false) {
-  return `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Partido</th><th>Resultado</th>${other ? "" : "<th>Condición</th><th>DT</th>"}<th>Torneo</th><th>Estadio</th><th></th></tr></thead><tbody>
-    ${matches.map(m => `<tr><td>${fmtDate(m.date)}</td><td>${escapeHtml(matchTitle(m, other))}</td><td><span class="chip ${resultClass(m.result)}">${escapeHtml(m.result)}</span></td>${other ? "" : `<td>${escapeHtml(m.condition)}</td><td>${escapeHtml(m.coach?.display || "Sin DT")}</td>`}<td>${escapeHtml(m.competition)}</td><td>${escapeHtml(m.stadium)}</td><td><button class="table-link" data-match-id="${m.id}" data-other="${other ? "1" : "0"}" type="button">Ver</button></td></tr>`).join("")}
+  return `<div class="table-wrap compact-table"><table><thead><tr><th>Fecha</th><th>Partido</th><th>Resultado</th>${other ? "" : "<th>Condición</th><th>DT</th>"}<th>Torneo</th><th>Estadio</th><th></th></tr></thead><tbody>
+    ${matches.map(m => `<tr><td>${fmtDate(m.date)}</td><td>${escapeHtml(matchTitle(m, other))}</td><td><span class="chip ${resultClass(m.result)}">${escapeHtml(m.result)}</span></td>${other ? "" : `<td>${escapeHtml(m.condition)}</td><td>${escapeHtml(m.coach?.display || "Sin DT")}</td>`}<td>${escapeHtml(m.competition)}</td><td title="${escapeHtml(m.stadium)}">${escapeHtml(m.stadium_alias || m.stadium)}</td><td><button class="table-link" data-match-id="${m.id}" data-other="${other ? "1" : "0"}" type="button">Ver</button></td></tr>`).join("")}
   </tbody></table></div>`;
 }
 
@@ -807,23 +842,36 @@ function renderMatches() {
   const query = state.matchSearch.trim().toLocaleLowerCase("es");
   const matches = [...state.filtered].sort((a,b) => b.date.localeCompare(a.date) || b.id-a.id).filter(m => {
     if (!query) return true;
-    return [m.date, m.home, m.away, m.rival, m.score, m.result, m.condition, m.competition, m.stadium, m.coach?.display, ...(m.goals || []).map(g => g.player)]
+    return [m.date, m.home, m.away, m.rival, m.score, m.result, m.condition, m.competition, m.stadium, m.stadium_alias, m.coach?.display, ...(m.goals || []).map(g => g.player)]
       .join(" ").toLocaleLowerCase("es").includes(query);
   });
+  const pageData = paginate(matches, state.matchPage, state.matchPageSize);
+  state.matchPage = pageData.page;
   root.innerHTML = `
     <div class="control-row">
       <div class="control-group grow"><label for="match-search">Buscar partido</label><input id="match-search" type="search" placeholder="Rival, torneo, estadio, marcador o goleador" value="${escapeHtml(state.matchSearch)}"></div>
       <div class="control-group"><label>Vista</label><div class="segmented"><button type="button" data-view="cards" class="${state.matchView === "cards" ? "active" : ""}">Tarjetas</button><button type="button" data-view="table" class="${state.matchView === "table" ? "active" : ""}">Tabla</button></div></div>
     </div>
     ${sectionHeading("Partidos", `${fmtInt(matches.length)} resultados`)}
-    ${state.matchView === "cards" ? `<div class="match-grid">${matches.map(m => matchCard(m)).join("")}</div>` : matchesTable(matches)}`;
+    ${paginationControls("matches", pageData, matches.length, state.matchPageSize)}
+    ${state.matchView === "cards" ? `<div class="match-grid">${pageData.items.map(m => matchCard(m)).join("")}</div>` : matchesTable(pageData.items)}
+    ${matches.length > state.matchPageSize ? paginationControls("matches-bottom", pageData, matches.length, state.matchPageSize) : ""}`;
   const search = $("#match-search");
   search.addEventListener("input", () => {
-    state.matchSearch = search.value;
+    state.matchSearch = search.value; state.matchPage = 1;
     window.clearTimeout(search._timer);
     search._timer = window.setTimeout(renderMatches, 160);
   });
-  $$('[data-view]', root).forEach(button => button.addEventListener("click", () => { state.matchView = button.dataset.view; renderMatches(); }));
+  $$('[data-view]', root).forEach(button => button.addEventListener("click", () => { state.matchView = button.dataset.view; state.matchPage = 1; renderMatches(); }));
+  const bindPager = prefix => {
+    const size = $(`#${prefix}-page-size`);
+    if (size) size.addEventListener("change", () => { state.matchPageSize = Number(size.value); state.matchPage = 1; renderMatches(); });
+    const prev = $(`#${prefix}-prev`);
+    const next = $(`#${prefix}-next`);
+    if (prev) prev.addEventListener("click", () => { state.matchPage -= 1; renderMatches(); window.scrollTo({top:0,behavior:"smooth"}); });
+    if (next) next.addEventListener("click", () => { state.matchPage += 1; renderMatches(); window.scrollTo({top:0,behavior:"smooth"}); });
+  };
+  bindPager("matches"); bindPager("matches-bottom");
   bindMatchLinks(root);
 }
 
@@ -838,23 +886,25 @@ function renderOther() {
   const root = $("#tab-other");
   const query = state.otherSearch.trim().toLocaleLowerCase("es");
   const all = currentOtherMatches();
-  const matches = [...all].sort((a,b) => b.date.localeCompare(a.date) || b.id-a.id).filter(m => !query || [m.date,m.home,m.away,m.score,m.competition,m.stadium,m.result].join(" ").toLocaleLowerCase("es").includes(query));
+  const matches = [...all].sort((a,b) => b.date.localeCompare(a.date) || b.id-a.id).filter(m => !query || [m.date,m.home,m.away,m.score,m.competition,m.stadium,m.stadium_alias,m.result].join(" ").toLocaleLowerCase("es").includes(query));
   if (!all.length) {
     root.innerHTML = `<div class="empty-state"><strong>No hay otros partidos en este rango.</strong><span>Estos partidos solo usan los filtros de fechas, años, estadio y torneo.</span></div>`;
     return;
   }
   const teams = topCount(all.flatMap(m => [{ team:m.home }, { team:m.away }]), x => x.team);
   const tournaments = topCount(all, m => m.competition);
-  const stadiums = topCount(all, m => m.stadium);
-  const mapRows = Array.from(groupBy(all, m => m.stadium), ([label, items]) => {
+  const stadiums = topCount(all, m => m.stadium_alias || m.stadium);
+  const mapRows = Array.from(groupBy(all, m => m.stadium_alias || m.stadium), ([label, items]) => {
     const first = items.find(m => m.latitude !== null && m.longitude !== null) || items[0];
     return { label, matches: items.length, wins: 0, draws: 0, losses: 0, latitude:first.latitude, longitude:first.longitude, city:first.stadium_city, country:first.stadium_country };
   });
+  const pageData = paginate(matches, state.otherPage, state.otherPageSize);
+  state.otherPage = pageData.page;
   root.innerHTML = `
     <div class="metric-grid">
       ${metricCard("Otros partidos", fmtInt(all.length))}
       ${metricCard("Equipo más visto", `${teams[0]?.label || "Sin datos"} · ${teams[0]?.count || 0}`)}
-      ${metricCard("Estadios", fmtInt(new Set(all.map(m => m.stadium)).size))}
+      ${metricCard("Estadios", fmtInt(new Set(all.map(m => m.stadium_alias || m.stadium)).size))}
       ${metricCard("Torneo más visto", `${tournaments[0]?.label || "Sin datos"} · ${tournaments[0]?.count || 0}`)}
     </div>
     <div class="control-row"><div class="control-group grow"><label for="other-search">Buscar otro partido</label><input id="other-search" type="search" placeholder="Equipo, torneo, estadio o marcador" value="${escapeHtml(state.otherSearch)}"></div></div>
@@ -865,13 +915,23 @@ function renderOther() {
       <div class="panel-card"><div id="other-map-chart" class="plot tall"></div></div>
     </div>
     ${sectionHeading("Otros partidos", `${fmtInt(matches.length)} resultados`)}
-    ${matchesTable(matches, true)}`;
+    ${paginationControls("other", pageData, matches.length, state.otherPageSize)}
+    ${matchesTable(pageData.items, true)}
+    ${matches.length > state.otherPageSize ? paginationControls("other-bottom", pageData, matches.length, state.otherPageSize) : ""}`;
   const search = $("#other-search");
   search.addEventListener("input", () => {
-    state.otherSearch = search.value;
+    state.otherSearch = search.value; state.otherPage = 1;
     window.clearTimeout(search._timer);
     search._timer = window.setTimeout(renderOther, 160);
   });
+  const bindPager = prefix => {
+    const size = $(`#${prefix}-page-size`);
+    if (size) size.addEventListener("change", () => { state.otherPageSize = Number(size.value); state.otherPage = 1; renderOther(); });
+    const prev = $(`#${prefix}-prev`); const next = $(`#${prefix}-next`);
+    if (prev) prev.addEventListener("click", () => { state.otherPage -= 1; renderOther(); window.scrollTo({top:0,behavior:"smooth"}); });
+    if (next) next.addEventListener("click", () => { state.otherPage += 1; renderOther(); window.scrollTo({top:0,behavior:"smooth"}); });
+  };
+  bindPager("other"); bindPager("other-bottom");
   bindMatchLinks(root);
   plotHorizontal("other-tournament-chart", tournaments.slice(0,12).map(r => ({label:r.label,count:r.count})), "label", "count", "Torneos vistos", "#1e3a8a");
   plotHorizontal("other-team-chart", teams.slice(0,12).map(r => ({label:r.label,count:r.count})), "label", "count", "Equipos más vistos");

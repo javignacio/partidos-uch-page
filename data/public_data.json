@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-07-28T21:22:56-04:00",
+  "schema_version": 2,
+  "generated_at": "2026-07-30T09:30:08-04:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
