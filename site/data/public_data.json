@@ -1,27 +1,27 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-01T19:34:46-04:00",
+  "generated_at": "2026-08-02T23:10:41-04:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
   },
   "stats": {
-    "uch_matches": 180,
+    "uch_matches": 181,
     "other_matches": 67,
-    "all_matches": 247,
-    "goals_uch": 299,
+    "all_matches": 248,
+    "goals_uch": 301,
     "goals_against": 190,
-    "goal_records": 299,
-    "wins": 87,
+    "goal_records": 301,
+    "wins": 88,
     "draws": 51,
     "losses": 40,
-    "performance": 58.4,
+    "performance": 58.7,
     "stadiums": 17,
     "rivals": 47,
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-07-26"
+    "date_max": "2026-08-02"
   },
   "filters": {
     "years": [
@@ -10228,6 +10228,64 @@
           "id": 299,
           "match_id": 246,
           "player": "E. VARGAS",
+          "minute": null,
+          "order": 2,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": 248,
+      "date": "2026-08-02",
+      "year": 2026,
+      "home": "UNIVERSIDAD DE CHILE",
+      "away": "HUACHIPATO",
+      "home_score": 2,
+      "away_score": 0,
+      "score": "2-0",
+      "competition": "CAMPEONATO NACIONAL",
+      "competition_type": null,
+      "stadium": "Estadio Nacional Julio Martinez Pradanos",
+      "stadium_alias": "Nacional",
+      "stadium_city": "Santiago",
+      "stadium_country": "Chile",
+      "latitude": -33.4647,
+      "longitude": -70.6109,
+      "status": "played",
+      "attendance": null,
+      "neutral": false,
+      "penalty_shootout": null,
+      "honors": [],
+      "rival": "HUACHIPATO",
+      "condition": "Local",
+      "goals_uch": 2,
+      "goals_rival": 0,
+      "goal_difference": 2,
+      "points": 3,
+      "result": "Triunfo",
+      "coach": {
+        "display": "Fernando Gago",
+        "official": "Fernando Gago",
+        "touchline": "Fernando Gago",
+        "suspended": false
+      },
+      "goals": [
+        {
+          "id": 300,
+          "match_id": 248,
+          "player": "E. VARGAS",
+          "minute": null,
+          "order": 1,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        },
+        {
+          "id": 301,
+          "match_id": 248,
+          "player": "M. MORALES",
           "minute": null,
           "order": 2,
           "type": "regular",
