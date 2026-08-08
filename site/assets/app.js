@@ -223,7 +223,7 @@ function setupDesktopSidebar() {
   const storageKey = "partidos-sidebar-collapsed";
   const apply = (collapsed) => {
     document.body.classList.toggle("sidebar-collapsed", collapsed);
-    button.textContent = collapsed ? "â€º" : "â€¹";
+    button.setAttribute("aria-expanded", collapsed ? "false" : "true");
     button.setAttribute("aria-label", collapsed ? "Mostrar filtros" : "Ocultar filtros");
     button.title = collapsed ? "Mostrar filtros" : "Ocultar filtros";
   };
@@ -234,9 +234,10 @@ function setupDesktopSidebar() {
     const next = !document.body.classList.contains("sidebar-collapsed");
     apply(next);
     try { localStorage.setItem(storageKey, next ? "1" : "0"); } catch (_) {}
-    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 240);
+    window.setTimeout(() => window.dispatchEvent(new Event("resize")), 220);
   });
 }
+
 function summarize(matches) {
   const played = matches.filter(m => m.points !== null);
   const wins = played.filter(m => m.result === "Triunfo").length;
@@ -453,7 +454,7 @@ function plotHorizontal(id, rows, labelKey, valueKey, title, color = "#2563eb") 
   const sorted = [...rows].sort((a, b) => Number(a[valueKey] || 0) - Number(b[valueKey] || 0));
   const values = sorted.map(r => Number(r[valueKey] || 0));
   const maxValue = Math.max(0, ...values);
-  const labelGap = maxValue > 0 ? Math.max(maxValue * 0.025, 0.55) : 1;
+  const labelGap = maxValue > 0 ? Math.max(maxValue * 0.035, 0.75) : 1;
   const rangeMax = maxValue > 0 ? maxValue + labelGap * 5 : 5;
   const annotations = sorted.map((r, index) => ({
     x: values[index] + labelGap,
@@ -474,11 +475,12 @@ function plotHorizontal(id, rows, labelKey, valueKey, title, color = "#2563eb") 
     marker: { color },
     hovertemplate: "%{y}: %{x}<extra></extra>"
   }], baseLayout(title, {
-    margin: { l: 145, r: 72, t: 55, b: 45 },
+    margin: { l: 145, r: 82, t: 55, b: 45 },
     xaxis: { gridcolor: "rgba(15,23,42,.09)", range: [0, rangeMax] },
     annotations
   }), plotConfig);
 }
+
 function plotVertical(id, rows, xKey, yKey, title, color = "#2563eb") {
   Plotly.newPlot(id, [{
     type: "bar",
@@ -656,34 +658,35 @@ function renderConditions() {
   const rows = summaryRows(state.filtered, m => m.condition, "condition")
     .sort((a, b) => CONDITION_ORDER.indexOf(a.condition) - CONDITION_ORDER.indexOf(b.condition));
   const total = summarize(state.filtered);
-  const tableHtml = `<div class="table-wrap"><table><thead><tr><th>CondiciÃ³n</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.condition)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`;
+  const tableHtml = `<div class="table-wrap"><table><thead><tr><th>Condición</th><th>Partidos</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.condition)}</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`;
   root.innerHTML = `
     <div class="metric-grid">
-      ${metricCard("Partidos analizados", fmtInt(total.matches), "SelecciÃ³n actual")}
-      ${metricCard("Mejor condiciÃ³n", rows.length ? [...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].condition : "Sin datos", rows.length ? fmtPct([...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].performance) : "")}
+      ${metricCard("Partidos analizados", fmtInt(total.matches), "Selección actual")}
+      ${metricCard("Mejor condición", rows.length ? [...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].condition : "Sin datos", rows.length ? fmtPct([...rows].sort((a,b)=>b.performance-a.performance || b.matches-a.matches)[0].performance) : "")}
       ${metricCard("Goles UCH", fmtInt(total.gf), `${fmtInt(total.gc)} recibidos`)}
       ${metricCard("Rendimiento global", fmtPct(total.performance), `${total.wins}-${total.draws}-${total.losses}`)}
     </div>
-    ${sectionHeading("ComparaciÃ³n por condiciÃ³n", "Resultados y distribuciÃ³n segÃºn localÃ­a")}
+    ${sectionHeading("Comparación por condición", "Resultados y distribución según localía")}
     <div class="condition-scorecards">
       ${CONDITION_ORDER.map(condition => {
         const row = rows.find(r => r.condition === condition);
         const performance = row ? row.performance : 0;
-        return `<article class="condition-scorecard"><div class="condition-scorecard-head"><strong>${escapeHtml(condition)}</strong><span>${row ? `${row.matches} partidos` : "Sin partidos"}</span></div><div class="condition-bar"><span style="width:${Math.max(0, Math.min(100, performance))}%"></span></div><div class="condition-record">${row ? `${row.wins}-${row.draws}-${row.losses} Â· ${fmtPct(performance)} Â· GF ${row.gf} / GC ${row.gc}` : "Sin datos"}</div></article>`;
+        return `<article class="condition-scorecard"><div class="condition-scorecard-head"><strong>${escapeHtml(condition)}</strong><span>${row ? `${row.matches} partidos` : "Sin partidos"}</span></div><div class="condition-bar"><span style="width:${Math.max(0, Math.min(100, performance))}%"></span></div><div class="condition-record">${row ? `${row.wins}-${row.draws}-${row.losses} · ${fmtPct(performance)} · GF ${row.gf} / GC ${row.gc}` : "Sin datos"}</div></article>`;
       }).join("")}
     </div>
     <div class="chart-grid">
       <div class="panel-card"><div id="condition-donut-chart" class="plot"></div></div>
       <div class="panel-card"><div id="condition-results-chart" class="plot"></div></div>
     </div>
-    ${dataDisclosure("Tabla por condiciÃ³n", tableHtml, rows.length)} `;
-  plotDonut("condition-donut-chart", rows.map(r => ({ label: r.condition, count: r.matches })), "label", "count", "DistribuciÃ³n por condiciÃ³n");
+    ${dataDisclosure("Tabla por condición", tableHtml, rows.length)} `;
+  plotDonut("condition-donut-chart", rows.map(r => ({ label: r.condition, count: r.matches })), "label", "count", "Distribución por condición");
   plotGrouped("condition-results-chart", rows.map(r => r.condition), [
     { name: "Triunfo", values: rows.map(r => r.wins), color: RESULT_COLORS["Triunfo"] },
     { name: "Empate", values: rows.map(r => r.draws), color: RESULT_COLORS["Empate"] },
     { name: "Derrota", values: rows.map(r => r.losses), color: RESULT_COLORS["Derrota"] }
-  ], "Resultados por condiciÃ³n");
+  ], "Resultados por condición");
 }
+
 function stadiumRows(matches) {
   return summaryRows(matches, m => m.stadium_alias || m.stadium, "label").map(row => {
     const first = row.items[0];
@@ -721,8 +724,8 @@ function renderStadiums() {
     <div class="chart-grid">
       <div class="panel-card"><div id="stadium-ranking-chart" class="plot tall"></div></div>
       <div class="panel-card"><div id="stadium-map-chart" class="plot tall"></div></div>
-    </div>    <div class="panel-card"><div id="stadium-results-chart" class="plot tall"></div></div>
-
+    </div>
+    <div class="panel-card"><div id="stadium-results-chart" class="plot tall"></div></div>
     ${dataDisclosure("Tabla de estadios", `<div class="table-wrap"><table><thead><tr><th>Estadio</th><th>Nombre oficial</th><th>Ciudad</th><th>País</th><th>Partidos</th><th>G-E-P</th><th>GF</th><th>GC</th><th>Rendimiento</th></tr></thead><tbody>${rows.map(r => `<tr><td>${escapeHtml(r.label)}</td><td>${escapeHtml(r.fullName || r.label)}</td><td>${escapeHtml(r.city || "")}</td><td>${escapeHtml(r.country || "")}</td><td>${r.matches}</td><td>${r.wins}-${r.draws}-${r.losses}</td><td>${r.gf}</td><td>${r.gc}</td><td>${fmtPct(r.performance)}</td></tr>`).join("")}</tbody></table></div>`, rows.length)} `;
   const select = $("#stadium-detail");
   select.value = state.selectedStadium;
@@ -730,7 +733,7 @@ function renderStadiums() {
   plotHorizontal("stadium-ranking-chart", rows.slice(0, 15), "label", "matches", "Estadios más visitados");
   plotStadiumMap("stadium-map-chart", rows);
   plotStackedResults("stadium-results-chart", rows.slice(0, 12), "label", "Resultados por estadio");
-  Plotly.relayout("stadium-results-chart", { "xaxis.tickangle": -28, "margin.b": 95 });
+  Plotly.relayout("stadium-results-chart", { "xaxis.tickangle": -28, "margin.b": 100 });
 }
 
 function renderRivals() {

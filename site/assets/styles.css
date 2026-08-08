@@ -382,40 +382,26 @@ tbody tr:hover { background: #f8fafc; }
   .pagination-actions { justify-content:space-between; }
 }
 
-#condition-donut-chart, #condition-results-chart, #condition-performance-chart, #condition-goals-chart { min-height: 310px; }
 
-/* PARTIDOS_SIDEBAR_COLLAPSE_V2 */
+
+
+/* Compact desktop sidebar toggle */
+.desktop-sidebar-toggle { display: none; }
 @media (min-width: 901px) {
-  #sidebar { transition: transform .22s ease; }
-  .main-shell { transition: margin-left .22s ease; }
+  #sidebar { transition: transform .20s ease; }
+  .main-shell { transition: margin-left .20s ease; }
   .desktop-sidebar-toggle {
-    position: fixed;
-    z-index: 1400;
-    left: 322px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 34px;
-    height: 64px;
-    border: 1px solid #cbd5e1;
-    border-left: 0;
-    border-radius: 0 12px 12px 0;
-    background: rgba(255,255,255,.96);
-    color: #1e3a8a;
-    font-size: 28px;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 8px 22px rgba(15,23,42,.10);
+    display: grid; place-items: center; position: fixed; z-index: 140;
+    left: calc(var(--sidebar-width) + 10px); top: 14px; width: 34px; height: 34px; padding: 0;
+    border: 1px solid var(--slate-200); border-radius: 10px; background: rgba(255,255,255,.96);
+    color: var(--slate-600); box-shadow: 0 5px 16px rgba(15,23,42,.08);
+    transition: left .20s ease, color .15s ease, border-color .15s ease, background .15s ease;
   }
-  .desktop-sidebar-toggle:hover { background: #f8fafc; }
-  body.sidebar-collapsed #sidebar { transform: translateX(-100%) !important; }
-  body.sidebar-collapsed .main-shell { margin-left: 0 !important; }
-  body.sidebar-collapsed .desktop-sidebar-toggle {
-    left: 0;
-    border-left: 1px solid #cbd5e1;
-    border-radius: 0 12px 12px 0;
-  }
+  .desktop-sidebar-toggle svg { width: 17px; height: 17px; transition: transform .20s ease; }
+  .desktop-sidebar-toggle:hover { color: var(--blue-700); border-color: rgba(37,99,235,.35); background: white; }
+  body.sidebar-collapsed #sidebar { transform: translateX(-100%); }
+  body.sidebar-collapsed .main-shell { margin-left: 0; }
+  body.sidebar-collapsed .desktop-sidebar-toggle { left: 10px; }
+  body.sidebar-collapsed .desktop-sidebar-toggle svg { transform: rotate(180deg); }
 }
-@media (max-width: 900px) {
-  .desktop-sidebar-toggle { display: none !important; }
-}
-/* END PARTIDOS_SIDEBAR_COLLAPSE_V2 */
+#condition-donut-chart, #condition-results-chart { min-height: 310px; }
