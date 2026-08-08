@@ -383,3 +383,39 @@ tbody tr:hover { background: #f8fafc; }
 }
 
 #condition-donut-chart, #condition-results-chart, #condition-performance-chart, #condition-goals-chart { min-height: 310px; }
+
+/* PARTIDOS_SIDEBAR_COLLAPSE_V2 */
+@media (min-width: 901px) {
+  #sidebar { transition: transform .22s ease; }
+  .main-shell { transition: margin-left .22s ease; }
+  .desktop-sidebar-toggle {
+    position: fixed;
+    z-index: 1400;
+    left: 322px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 64px;
+    border: 1px solid #cbd5e1;
+    border-left: 0;
+    border-radius: 0 12px 12px 0;
+    background: rgba(255,255,255,.96);
+    color: #1e3a8a;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(15,23,42,.10);
+  }
+  .desktop-sidebar-toggle:hover { background: #f8fafc; }
+  body.sidebar-collapsed #sidebar { transform: translateX(-100%) !important; }
+  body.sidebar-collapsed .main-shell { margin-left: 0 !important; }
+  body.sidebar-collapsed .desktop-sidebar-toggle {
+    left: 0;
+    border-left: 1px solid #cbd5e1;
+    border-radius: 0 12px 12px 0;
+  }
+}
+@media (max-width: 900px) {
+  .desktop-sidebar-toggle { display: none !important; }
+}
+/* END PARTIDOS_SIDEBAR_COLLAPSE_V2 */
