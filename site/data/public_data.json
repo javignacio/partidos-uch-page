@@ -1,27 +1,27 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-08T14:07:49-04:00",
+  "generated_at": "2026-08-15T22:24:00-04:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
   },
   "stats": {
-    "uch_matches": 182,
+    "uch_matches": 183,
     "other_matches": 67,
-    "all_matches": 249,
-    "goals_uch": 302,
-    "goals_against": 190,
-    "goal_records": 302,
-    "wins": 89,
+    "all_matches": 250,
+    "goals_uch": 305,
+    "goals_against": 191,
+    "goal_records": 305,
+    "wins": 90,
     "draws": 51,
     "losses": 40,
-    "performance": 58.9,
+    "performance": 59.1,
     "stadiums": 17,
     "rivals": 47,
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-08-05"
+    "date_max": "2026-08-15"
   },
   "filters": {
     "years": [
@@ -10336,6 +10336,74 @@
           "player": "N. FERNANDEZ",
           "minute": null,
           "order": 1,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": 250,
+      "date": "2026-08-15",
+      "year": 2026,
+      "home": "LIMACHE",
+      "away": "UNIVERSIDAD DE CHILE",
+      "home_score": 1,
+      "away_score": 3,
+      "score": "1-3",
+      "competition": "CAMPEONATO NACIONAL",
+      "competition_type": null,
+      "stadium": "Estadio Municipal Lucio Farina Fernandez",
+      "stadium_alias": "Lucio Farina",
+      "stadium_city": "Quillota",
+      "stadium_country": "Chile",
+      "latitude": -32.8794,
+      "longitude": -71.2483,
+      "status": "played",
+      "attendance": null,
+      "neutral": false,
+      "penalty_shootout": null,
+      "honors": [],
+      "rival": "LIMACHE",
+      "condition": "Visita",
+      "goals_uch": 3,
+      "goals_rival": 1,
+      "goal_difference": 2,
+      "points": 3,
+      "result": "Triunfo",
+      "coach": {
+        "display": "Fernando Gago",
+        "official": "Fernando Gago",
+        "touchline": "Fernando Gago",
+        "suspended": false
+      },
+      "goals": [
+        {
+          "id": 303,
+          "match_id": 250,
+          "player": "F. HORMAZABAL",
+          "minute": null,
+          "order": 1,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        },
+        {
+          "id": 304,
+          "match_id": 250,
+          "player": "A. ARCE",
+          "minute": null,
+          "order": 2,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        },
+        {
+          "id": 305,
+          "match_id": 250,
+          "player": "G. REYNA",
+          "minute": null,
+          "order": 3,
           "type": "regular",
           "own_goal": false,
           "penalty": false
