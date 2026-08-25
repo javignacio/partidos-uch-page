@@ -1,27 +1,27 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-22T17:57:50-04:00",
+  "generated_at": "2026-08-25T09:34:32-04:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
   },
   "stats": {
-    "uch_matches": 183,
-    "other_matches": 68,
-    "all_matches": 251,
-    "goals_uch": 305,
-    "goals_against": 191,
-    "goal_records": 305,
+    "uch_matches": 184,
+    "other_matches": 69,
+    "all_matches": 253,
+    "goals_uch": 306,
+    "goals_against": 193,
+    "goal_records": 306,
     "wins": 90,
     "draws": 51,
-    "losses": 40,
-    "performance": 59.1,
+    "losses": 41,
+    "performance": 58.8,
     "stadiums": 17,
     "rivals": 47,
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-08-15"
+    "date_max": "2026-08-23"
   },
   "filters": {
     "years": [
@@ -10409,6 +10409,54 @@
           "penalty": false
         }
       ]
+    },
+    {
+      "id": 252,
+      "date": "2026-08-23",
+      "year": 2026,
+      "home": "UNIVERSIDAD DE CHILE",
+      "away": "CC",
+      "home_score": 1,
+      "away_score": 2,
+      "score": "1-2",
+      "competition": "CAMPEONATO NACIONAL",
+      "competition_type": null,
+      "stadium": "Estadio Nacional Julio Martinez Pradanos",
+      "stadium_alias": "Nacional",
+      "stadium_city": "Santiago",
+      "stadium_country": "Chile",
+      "latitude": -33.4647,
+      "longitude": -70.6109,
+      "status": "played",
+      "attendance": null,
+      "neutral": false,
+      "penalty_shootout": null,
+      "honors": [],
+      "rival": "CC",
+      "condition": "Local",
+      "goals_uch": 1,
+      "goals_rival": 2,
+      "goal_difference": -1,
+      "points": 0,
+      "result": "Derrota",
+      "coach": {
+        "display": "Fernando Gago",
+        "official": "Fernando Gago",
+        "touchline": "Fernando Gago",
+        "suspended": false
+      },
+      "goals": [
+        {
+          "id": 306,
+          "match_id": 252,
+          "player": "C. ARANGUIZ",
+          "minute": null,
+          "order": 1,
+          "type": "regular",
+          "own_goal": false,
+          "penalty": false
+        }
+      ]
     }
   ],
   "other_matches": [
@@ -12043,6 +12091,30 @@
       "penalty_shootout": null,
       "honors": [],
       "result": "Visita gana"
+    },
+    {
+      "id": 253,
+      "date": "2026-08-24",
+      "year": 2026,
+      "home": "EVERTON",
+      "away": "U DE CONCE",
+      "home_score": 3,
+      "away_score": 1,
+      "score": "3-1",
+      "competition": "CAMPEONATO NACIONAL",
+      "competition_type": null,
+      "stadium": "Estadio Sausalito",
+      "stadium_alias": "Sausalito",
+      "stadium_city": "Vina del Mar",
+      "stadium_country": "Chile",
+      "latitude": -33.0146,
+      "longitude": -71.5353,
+      "status": "played",
+      "attendance": null,
+      "neutral": false,
+      "penalty_shootout": null,
+      "honors": [],
+      "result": "Local gana"
     }
   ]
 }
