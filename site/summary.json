@@ -3,7 +3,7 @@
   "title": "Partidos UCH",
   "description": "Archivo de partidos de Universidad de Chile vistos en el estadio.",
   "url": "./",
-  "updated": "2026-08-25T09:34:32-04:00",
+  "updated": "2026-11-09T08:28:46-03:00",
   "metrics": [
     {
       "label": "Partidos UCH",
@@ -20,8 +20,8 @@
   ],
   "raw": {
     "uch_matches": 184,
-    "other_matches": 69,
-    "all_matches": 253,
+    "other_matches": 72,
+    "all_matches": 256,
     "goals_uch": 306,
     "goals_against": 193,
     "goal_records": 306,
