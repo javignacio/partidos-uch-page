@@ -3,7 +3,7 @@
   "title": "Partidos UCH",
   "description": "Archivo de partidos de Universidad de Chile vistos en el estadio.",
   "url": "./",
-  "updated": "2026-11-09T08:28:46-03:00",
+  "updated": "2026-11-09T08:39:17-03:00",
   "metrics": [
     {
       "label": "Partidos UCH",
@@ -34,6 +34,6 @@
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-08-23"
+    "date_max": "2026-11-07"
   }
 }

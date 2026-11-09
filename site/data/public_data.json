@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-09T08:28:46-03:00",
+  "generated_at": "2026-11-09T08:39:17-03:00",
   "team": {
     "id": 1,
     "name": "UNIVERSIDAD DE CHILE"
@@ -21,7 +21,7 @@
     "coaches": 24,
     "years": 19,
     "date_min": "2006-11-14",
-    "date_max": "2026-08-23"
+    "date_max": "2026-11-07"
   },
   "filters": {
     "years": [
